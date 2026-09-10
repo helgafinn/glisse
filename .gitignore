@@ -1,0 +1,20 @@
+.DS_Store
+.build/
+build/
+dist/
+*.dmg
+*.xcuserstate
+xcuserdata/
+.swiftpm/
+DerivedData/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+.netrc
+# Never commit signing material.
+*.p12
+*.cer
+*.certSigningRequest
+*.provisionprofile
+notarization.env

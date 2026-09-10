@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+
+	<!--
+	  The executable stays ASCII ("Glisse") because it is also the process name,
+	  the SwiftPM product name and what appears in `ps`. Only the user-facing
+	  name carries the accent.
+	-->
+	<key>CFBundleExecutable</key>
+	<string>Glisse</string>
+	<key>CFBundleName</key>
+	<string>Glissé</string>
+	<key>CFBundleDisplayName</key>
+	<string>Glissé</string>
+
+	<key>CFBundleIdentifier</key>
+	<string>xyz.glisse.Glisse</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.0</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>CFBundleIconFile</key>
+	<string>AppIcon</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+
+	<!-- Menu-bar accessory app: no Dock icon, no app menu. -->
+	<key>LSUIElement</key>
+	<true/>
+
+	<!-- Glissé never opens documents or URLs. -->
+	<key>NSSupportsAutomaticTermination</key>
+	<false/>
+	<key>NSSupportsSuddenTermination</key>
+	<false/>
+
+	<key>NSHumanReadableCopyright</key>
+	<string>Glissé. Personal-use utility. No warranty.</string>
+
+	<!--
+	  macOS does not surface a purpose string for the Accessibility (AXAPI)
+	  permission the way it does for Camera/Mic, but including it documents intent
+	  and is harmless.
+	-->
+	<key>NSAccessibilityUsageDescription</key>
+	<string>Glissé needs Accessibility access to show the macOS volume and brightness display while you slide, to pause gestures while you type, to keep the pointer still, and to synthesise a middle click for the optional three-finger tap.</string>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Used only as a last-resort fallback for setting output volume when Core Audio reports the device as unsupported.</string>
+</dict>
+</plist>
