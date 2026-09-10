@@ -48,6 +48,7 @@ does not silently reset anyone's configuration.
 - [Known limitations](#known-limitations)
 - [Troubleshooting](#troubleshooting)
 - [Project layout](#project-layout)
+- [License](#license)
 
 ---
 
@@ -737,3 +738,12 @@ This is an independent implementation. It shares a *category* with other
 trackpad-slider utilities but contains no third-party source, binaries, artwork
 or branding. The DDC/CI framing follows the published VESA MCCS specification.
 The logo is generated from `Sources/GlisseKit/Utilities/LogoArtwork.swift`.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+The permission model is worth stating plainly alongside that: Glissé needs
+Accessibility, and it reaches private frameworks to do what it does. The licence
+grants you the right to read every line before you give it those permissions,
+which is the point of shipping it this way rather than as a binary.

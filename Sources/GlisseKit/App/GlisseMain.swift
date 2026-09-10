@@ -25,7 +25,6 @@ public enum GlisseMain {
         let flags = Set(arguments.dropFirst())
 
         if flags.contains("--version") || flags.contains("-v") {
-            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "dev"
             print("\(Branding.displayName) \(Branding.version)")
             return
         }
