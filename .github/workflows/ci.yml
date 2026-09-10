@@ -1,0 +1,86 @@
+name: CI
+
+# Glissé reaches private frameworks and a Force Touch trackpad, so CI cannot
+# exercise the gestures themselves. What it can do is guarantee the package still
+# compiles on a clean machine and that the pure gesture core — the part with no
+# hardware dependency — stays correct. That is where the tests live.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build and test
+    runs-on: macos-15
+    steps:
+      # Pinned to a commit SHA rather than a tag, because a tag can be repointed
+      # at different code without this file changing.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Build
+        run: swift build --configuration debug
+
+      - name: Test
+        run: swift test
+
+      # A warning today is an error someone stops reading tomorrow. The package
+      # builds clean, so keep it that way.
+      - name: Fail on compiler warnings
+        run: |
+          set -o pipefail
+          swift build --configuration debug 2>&1 | tee build.log
+          if grep -q 'warning:' build.log; then
+            echo "::error::Build produced warnings"
+            grep 'warning:' build.log
+            exit 1
+          fi
+
+  release-build:
+    name: Release build and app bundle
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # Exercises the Makefile path a user actually runs, not just `swift build`.
+      # No signing identity exists on a runner, so the Makefile falls back to
+      # ad-hoc signing. That is fine for proving the bundle assembles; a real
+      # identity is only needed for distribution.
+      - name: Assemble the .app
+        run: make release
+
+      - name: Confirm the bundle is well formed
+        run: |
+          set -euo pipefail
+          APP=$(find dist -maxdepth 1 -name '*.app' -print -quit)
+          if [ -z "$APP" ]; then echo "::error::no .app produced"; exit 1; fi
+          echo "built: $APP"
+          test -f "$APP/Contents/Info.plist" || { echo "::error::missing Info.plist"; exit 1; }
+          BIN=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Contents/Info.plist")
+          test -x "$APP/Contents/MacOS/$BIN" || { echo "::error::missing executable $BIN"; exit 1; }
+          # A menu-bar-only app must declare LSUIElement, otherwise it takes a
+          # Dock icon and a main menu it has no windows for.
+          test "$(/usr/libexec/PlistBuddy -c 'Print :LSUIElement' "$APP/Contents/Info.plist")" = "true" \
+            || { echo "::error::LSUIElement is not true"; exit 1; }
+          codesign --verify --verbose=2 "$APP"
+
+      - name: Confirm --version reports the bundle version
+        run: |
+          set -euo pipefail
+          APP=$(find dist -maxdepth 1 -name '*.app' -print -quit)
+          BIN=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Contents/Info.plist")
+          "$APP/Contents/MacOS/$BIN" --version
