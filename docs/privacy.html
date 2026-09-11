@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy Policy — Glissé</title>
+<meta name="description" content="Glissé collects nothing. The app makes no network connections of any kind, and this site sets no cookies and runs no analytics.">
+<link rel="canonical" href="https://helgafinn.github.io/glisse/privacy.html">
+<meta name="theme-color" content="#0b0e14">
+<link rel="icon" type="image/png" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<div class="marks" aria-hidden="true">
+  <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+</div>
+
+<main id="main" class="wrap doc">
+  <a class="backlink" href="./">&#8592; Glissé</a>
+
+  <p class="label" style="margin-bottom:1.25rem">Last updated 11 September 2026</p>
+  <h1>Privacy Policy</h1>
+
+  <p>Glissé is a free, open-source macOS utility. It collects no data about you, and there is no server for it to collect data to.</p>
+
+  <h2>The application</h2>
+
+  <p>Glissé contains <strong>no network code of any kind</strong>. It makes no outbound connections, so it cannot send anything anywhere. There is no telemetry, no analytics, no crash reporting, no update check, no licence check, and no account system. Nothing about your usage is recorded or transmitted.</p>
+
+  <p>What the app reads on your Mac, and why:</p>
+
+  <ul>
+    <li><strong>Trackpad contact data</strong>, to detect an edge slide. It is used in the moment to compute a gesture and is never stored or written to disk.</li>
+    <li><strong>Display and audio state</strong>, to read and set the current brightness and volume.</li>
+    <li><strong>Keystroke timing</strong>, if Accessibility is granted, so gestures can be suppressed for half a second after you type. The event tap is created listen-only: it observes that a key was pressed in order to start a timer, and it cannot record, alter or block what you typed.</li>
+    <li><strong>Modifier key state</strong>, if you enable the modifier requirement, through a second listen-only tap.</li>
+  </ul>
+
+  <p>Your settings are stored locally in the standard macOS preferences domain <code>xyz.glisse.Glisse</code>, on your machine only. Removing the app and running <code>defaults delete xyz.glisse.Glisse</code> deletes them.</p>
+
+  <p>Because the app is open source under the MIT licence, none of the above has to be taken on trust. The <a href="https://github.com/helgafinn/glisse">source is public</a> and can be read or built yourself.</p>
+
+  <h2>This website</h2>
+
+  <p>This site is static. It sets no cookies, embeds no third-party scripts, loads no external fonts, and runs no analytics or tracking of any kind. The brightness and volume you set by dragging the page edges are held in memory in your own browser for the length of the visit and are never transmitted or saved.</p>
+
+  <p>The site is hosted on <strong>GitHub Pages</strong>. As with any web host, GitHub receives the technical information required to serve a page — your IP address and browser user agent — and may retain it in its own server logs. That processing is GitHub's, not ours, and is covered by the <a href="https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement">GitHub Privacy Statement</a>. We have no access to those logs.</p>
+
+  <p>Downloads are served from GitHub Releases, and the Homebrew formula fetches from the same place, so the same applies there.</p>
+
+  <h2>Children</h2>
+
+  <p>Glissé is a general-purpose utility and is not directed at children. Since no data is collected from anyone, none is collected from children either.</p>
+
+  <h2>Changes</h2>
+
+  <p>If this policy changes, the revision will be committed to the project repository, so the full history of what it said and when is public. The date at the top reflects the current version.</p>
+
+  <h2>Contact</h2>
+
+  <p>Questions about privacy, or anything else, belong in the <a href="https://github.com/helgafinn/glisse/issues">project issue tracker</a>, where the answer is public and useful to the next person who asks.</p>
+</main>
+
+<footer class="wrap">
+  <div class="foot-grid">
+    <div>
+      <div class="brandmark" style="margin-bottom:1rem">
+        <img src="assets/icon-256.png" alt="" width="26" height="26">
+        <b>Glissé</b>
+      </div>
+      <p class="label">Trackpad edge sliders for macOS</p>
+    </div>
+    <nav aria-label="Project">
+      <p class="label" style="margin-bottom:0.4rem">Project</p>
+      <a href="./">Home</a>
+      <a href="https://github.com/helgafinn/glisse">Source</a>
+      <a href="writeup.html">Write-up</a>
+    </nav>
+    <nav aria-label="Legal">
+      <p class="label" style="margin-bottom:0.4rem">Legal</p>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="https://github.com/helgafinn/glisse/blob/main/LICENSE">MIT Licence</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
