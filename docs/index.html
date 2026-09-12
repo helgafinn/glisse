@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glissé — trackpad edge sliders for macOS brightness and volume</title>
+<meta name="description" content="Slide the left edge of your trackpad for brightness, the right for volume, with the real macOS HUD. Free and open source, MIT licensed. macOS 13+.">
+<link rel="canonical" href="https://helgafinn.github.io/glisse/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Glissé — trackpad edge sliders for macOS">
+<meta property="og:description" content="Glide the left trackpad edge to dim, the right to change volume. Real system HUD, haptic ticks. Free and open source.">
+<meta property="og:url" content="https://helgafinn.github.io/glisse/">
+<meta name="twitter:card" content="summary">
+<meta name="theme-color" content="#fff6e9">
+<link rel="icon" type="image/png" href="assets/icon-256.png">
+<link rel="apple-touch-icon" href="assets/icon-256.png">
+<link rel="preload" href="assets/fonts/fraunces-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/spacegrotesk-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<div id="dim"></div>
+
+<!-- reusable art -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
+  <linearGradient id="gWarm" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffe3a0"/><stop offset=".55" stop-color="#ffc02e"/><stop offset="1" stop-color="#ff7a2f"/>
+  </linearGradient>
+  <linearGradient id="gCool" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#8cc9ff"/><stop offset=".6" stop-color="#2c4bff"/><stop offset="1" stop-color="#1a2fb8"/>
+  </linearGradient>
+
+  <symbol id="i-slide" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round"><path d="M6 4v16M18 4v16"/><rect x="3" y="9" width="6" height="3.4" rx="1.7" fill="#191627" stroke="none"/><rect x="15" y="13" width="6" height="3.4" rx="1.7" fill="#191627" stroke="none"/></g></symbol>
+  <symbol id="i-hud" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="3.5"/><path d="M7 15h10" stroke-linecap="round"/><circle cx="12" cy="10.5" r="2"/></g></symbol>
+  <symbol id="i-tick" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round"><path d="M4 12h3l2.5-6 3 12 2.5-6h5"/></g></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2.5"/><path d="M7 10h.01M11 10h.01M15 10h.01M8 14h8" stroke-linecap="round"/></g></symbol>
+  <symbol id="i-fine" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round"><path d="M12 3v18"/><path d="M8 7h8M8 12h8M8 17h8"/></g></symbol>
+  <symbol id="i-quarter" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M3 16h18" /><rect x="3" y="16" width="18" height="4" fill="#191627" stroke="none"/></g></symbol>
+  <symbol id="i-mod" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 15.5V9M9 12l3-3 3 3"/></g></symbol>
+  <symbol id="i-pointer" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linejoin="round"><path d="M6 3l12 8-5 1.4 3 6.6-2.6 1.3-3-6.6L6 18z"/></g></symbol>
+  <symbol id="i-three" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="13.5" width="18" height="7.5" rx="2.5"/><path d="M7 10V5.5M12 10V3.5M17 10V5.5"/></g></symbol>
+  <symbol id="i-display" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2.5"/><path d="M9 21h6M12 17v4" stroke-linecap="round"/></g></symbol>
+  <symbol id="i-login" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h4"/><path d="M15 8l4 4-4 4M19 12H9"/></g></symbol>
+  <symbol id="i-menubar" viewBox="0 0 24 24"><g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18"/><circle cx="17" cy="6" r="0.1"/><rect x="3" y="10" width="18" height="10" rx="2.5"/></g></symbol>
+</defs></svg>
+
+<!-- the two live edges -->
+<button class="rail rail-left" data-kind="brightness"
+        role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"
+        aria-label="Brightness. Drag, or use the arrow keys.">
+  <span class="rail-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  <span class="rail-thumb" aria-hidden="true"></span>
+  <span class="rail-cap" aria-hidden="true">Brightness</span>
+</button>
+
+<button class="rail rail-right" data-kind="volume"
+        role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50"
+        aria-label="Volume. Drag, or use the arrow keys.">
+  <span class="rail-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+  <span class="rail-thumb" aria-hidden="true"></span>
+  <span class="rail-cap" aria-hidden="true">Volume</span>
+</button>
+
+<div id="hud" role="status" aria-live="off">
+  <svg id="glyph-brightness" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4.4" fill="#ffc02e" stroke="#191627" stroke-width="2"/>
+    <g stroke="#191627" stroke-width="2.2" stroke-linecap="round">
+      <path d="M12 1.6v2.4M12 20v2.4M1.6 12h2.4M20 12h2.4"/>
+      <path d="M4.6 4.6l1.7 1.7M17.7 17.7l1.7 1.7M19.4 4.6l-1.7 1.7M6.3 17.7l-1.7 1.7"/>
+    </g>
+  </svg>
+  <svg id="glyph-volume" viewBox="0 0 24 24" aria-hidden="true" style="display:none">
+    <path d="M13 3.4 7.7 7.8H4.2A1.2 1.2 0 0 0 3 9v6a1.2 1.2 0 0 0 1.2 1.2h3.5l5.3 4.4z" fill="#2c4bff" stroke="#191627" stroke-width="2" stroke-linejoin="round"/>
+    <g fill="none" stroke="#191627" stroke-width="2.2" stroke-linecap="round">
+      <path d="M17.2 9.2a4.4 4.4 0 0 1 0 5.6"/><path d="M19.8 6.8a8 8 0 0 1 0 10.4"/>
+    </g>
+  </svg>
+  <div class="hud-segs" id="hud-segs" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+</div>
+
+<main id="main">
+
+  <header class="hero wrap">
+    <div class="confetti" aria-hidden="true">
+      <svg class="float" style="top:6%;right:6%" width="54" height="54" viewBox="0 0 54 54"><path d="M27 2l5.4 16.6H50l-14.2 10.3 5.4 16.6L27 35.2 12.8 45.5l5.4-16.6L4 18.6h17.6z" fill="#ffc02e" stroke="#191627" stroke-width="2.5"/></svg>
+      <svg class="spin" style="bottom:12%;right:16%" width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" fill="#1fd0a3" stroke="#191627" stroke-width="2.5"/><circle cx="20" cy="20" r="6" fill="#191627"/></svg>
+      <svg class="float-2" style="top:32%;left:-10px" width="64" height="30" viewBox="0 0 64 30"><path d="M2 22c8-22 16 18 24-4s16 14 24-8" fill="none" stroke="#ff5d73" stroke-width="3.5" stroke-linecap="round"/></svg>
+    </div>
+
+    <div class="hero-top">
+      <div class="brandmark">
+        <img src="assets/icon-256.png" alt="" width="34" height="34">
+        <b>Glissé</b>
+      </div>
+      <span class="pill">v1.0.0 · macOS 13+ · MIT</span>
+    </div>
+
+    <div class="hero-grid">
+      <div>
+        <h1 class="display">Edge<br><mark>sliders.</mark>
+          <span>Brightness left · Volume right</span>
+        </h1>
+        <p class="lede">Glide the left edge of your trackpad to dim the screen. The right edge for volume. Nothing to configure, no window, no overlay.</p>
+
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="#install">Install it free</a>
+          <a class="btn btn-sun" href="https://github.com/helgafinn/glisse">Source on GitHub</a>
+        </div>
+
+        <div class="nudge">
+          <span class="nudge-arrow" aria-hidden="true"></span>
+          <span class="label">Drag this page's edges — go on</span>
+        </div>
+      </div>
+
+      <!-- hero scene: a trackpad, lit at both edges -->
+      <svg class="scene" viewBox="0 0 460 400" role="img" aria-label="Illustration of a trackpad with the left edge lit warm for brightness and the right edge lit blue for volume, a finger sliding down the left edge.">
+        <ellipse cx="230" cy="366" rx="176" ry="17" fill="#191627" opacity=".12"/>
+        <!-- playful colour blob behind the machine -->
+        <circle cx="368" cy="104" r="72" fill="#c7b3ff"/>
+        <circle cx="86" cy="290" r="54" fill="#8cc9ff"/>
+        <!-- laptop base -->
+        <rect x="34" y="52" width="392" height="286" rx="26" fill="#fff" stroke="#191627" stroke-width="3.5"/>
+        <!-- trackpad -->
+        <rect x="74" y="90" width="312" height="212" rx="16" fill="#fff6e9" stroke="#191627" stroke-width="3.5"/>
+        <!-- edge strips -->
+        <rect x="74" y="90" width="46" height="212" rx="14" fill="url(#gWarm)" stroke="#191627" stroke-width="3.5"/>
+        <rect x="340" y="90" width="46" height="212" rx="14" fill="url(#gCool)" stroke="#191627" stroke-width="3.5"/>
+        <!-- tick ladders -->
+        <g stroke="#191627" stroke-width="2.5" opacity=".35">
+          <path d="M88 118h18M88 146h18M88 174h18M88 202h18M88 230h18M88 258h18"/>
+        </g>
+        <g stroke="#fff6e9" stroke-width="2.5" opacity=".6">
+          <path d="M354 118h18M354 146h18M354 174h18M354 202h18M354 230h18M354 258h18"/>
+        </g>
+        <!-- thumbs -->
+        <rect x="80" y="188" width="34" height="13" rx="6.5" fill="#fff6e9" stroke="#191627" stroke-width="3" transform="rotate(-20 97 194)"/>
+        <rect x="346" y="150" width="34" height="13" rx="6.5" fill="#fff6e9" stroke="#191627" stroke-width="3" transform="rotate(-20 363 156)"/>
+        <!-- sun over the warm edge -->
+        <g transform="translate(158 132)">
+          <circle r="20" fill="#ffc02e" stroke="#191627" stroke-width="3"/>
+          <g stroke="#191627" stroke-width="3" stroke-linecap="round">
+            <path d="M0-31v9M0 22v9M-31 0h9M22 0h9M-22-22l6 6M16 16l6 6M22-22l-6 6M-16 16l-6 6"/>
+          </g>
+        </g>
+        <!-- speaker over the cool edge -->
+        <g transform="translate(268 236)">
+          <path d="M-16-14-4-4h-9a3 3 0 0 0-3 3v4a3 3 0 0 0 3 3h9L-4 16z" fill="#2c4bff" stroke="#191627" stroke-width="3" stroke-linejoin="round"/>
+          <g fill="none" stroke="#191627" stroke-width="3" stroke-linecap="round">
+            <path d="M4-7a9 9 0 0 1 0 14"/><path d="M12-13a17 17 0 0 1 0 26"/>
+          </g>
+        </g>
+        <!-- finger sliding the warm edge -->
+        <g transform="translate(97 200)">
+          <path d="M0 0c-4 14-2 34 2 48 3 11 12 18 24 18h16c13 0 22-9 22-22V26c0-6-9-6-9 0v10c0-8-10-8-10 0v-6c0-8-10-8-10 0v-8C35 8 24-4 12-6 4-8 2-6 0 0z"
+                fill="#fff6e9" stroke="#191627" stroke-width="3.5" stroke-linejoin="round"/>
+          <path d="M6 8c6 10 8 22 8 32" fill="none" stroke="#191627" stroke-width="2.5" opacity=".4"/>
+        </g>
+        <!-- motion ticks beside the finger -->
+        <g stroke="#ff5d73" stroke-width="3.5" stroke-linecap="round">
+          <path d="M56 176h14M52 194h18M56 212h14"/>
+        </g>
+      </svg>
+    </div>
+  </header>
+
+  <!-- what each edge does -->
+  <svg class="wave" style="color:var(--paper-2)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V22c140-26 300 24 470 10S840-8 1010 8s150 20 190 16v36z"/></svg>
+
+  <section class="block-paper2" aria-label="What each edge does">
+    <div class="wrap edges">
+      <article class="edge">
+        <span class="pill c-sun" style="background:var(--sun)">Left edge</span>
+        <h2 class="h3">Brightness, on the real backlight</h2>
+        <svg class="edge-illo" viewBox="0 0 340 180" role="img" aria-label="A screen dimming from dark to bright, with a sun.">
+          <rect x="6" y="14" width="328" height="132" rx="14" fill="url(#gWarm)" stroke="#191627" stroke-width="3.5"/>
+          <rect x="22" y="30" width="296" height="100" rx="8" fill="#191627" opacity=".82"/>
+          <rect x="22" y="30" width="296" height="100" rx="8" fill="url(#gWarm)" opacity=".25"/>
+          <g transform="translate(80 80)"><circle r="15" fill="#ffc02e" stroke="#fff6e9" stroke-width="2.5"/><g stroke="#fff6e9" stroke-width="2.5" stroke-linecap="round"><path d="M0-24v7M0 17v7M-24 0h7M17 0h7"/></g></g>
+          <g transform="translate(230 80)"><circle r="15" fill="#fff6e9" stroke="#191627" stroke-width="2.5"/><g stroke="#fff6e9" stroke-width="2.5" stroke-linecap="round"><path d="M0-24v7M0 17v7M-24 0h7M17 0h7"/></g></g>
+          <path d="M120 80h80" stroke="#fff6e9" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 8"/>
+          <path d="M196 74l8 6-8 6" fill="none" stroke="#fff6e9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <rect x="6" y="156" width="328" height="14" rx="7" fill="#fff6e9" stroke="#191627" stroke-width="3"/>
+        </svg>
+        <p>Not a dark overlay and not a gamma trick. The panel is actually dimmer, and the display you see is the one macOS draws itself rather than a lookalike.</p>
+      </article>
+
+      <article class="edge">
+        <span class="pill" style="background:var(--sky)">Right edge</span>
+        <h2 class="h3">Volume, following your output</h2>
+        <svg class="edge-illo" viewBox="0 0 340 180" role="img" aria-label="A speaker with sound arcs and a row of level segments.">
+          <rect x="6" y="14" width="328" height="132" rx="14" fill="url(#gCool)" stroke="#191627" stroke-width="3.5"/>
+          <g transform="translate(96 80)">
+            <path d="M-26-22-6-6h-14a4 4 0 0 0-4 4v4a4 4 0 0 0 4 4h14L-6 22z" fill="#fff6e9" stroke="#191627" stroke-width="3.5" stroke-linejoin="round"/>
+            <g fill="none" stroke="#fff6e9" stroke-width="3.5" stroke-linecap="round">
+              <path d="M6-11a13 13 0 0 1 0 22"/><path d="M18-21a25 25 0 0 1 0 42"/>
+            </g>
+          </g>
+          <g fill="#fff6e9" stroke="#191627" stroke-width="2.5">
+            <rect x="176" y="96" width="15" height="18" rx="3"/>
+            <rect x="197" y="86" width="15" height="28" rx="3"/>
+            <rect x="218" y="72" width="15" height="42" rx="3"/>
+            <rect x="239" y="58" width="15" height="56" rx="3"/>
+            <rect x="260" y="80" width="15" height="34" rx="3" fill="#191627" opacity=".25"/>
+            <rect x="281" y="92" width="15" height="22" rx="3" fill="#191627" opacity=".25"/>
+          </g>
+          <rect x="6" y="156" width="328" height="14" rx="7" fill="#fff6e9" stroke="#191627" stroke-width="3"/>
+        </svg>
+        <p>The trackpad ticks under your finger as the value moves, driven by the actuator so it works from a background app. Headphones, speakers, whatever is current.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- activation rule -->
+  <svg class="wave" style="color:var(--ink)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V30c180 24 320-26 520-14s330 30 480 4 200-6 200-6v46z"/></svg>
+
+  <section class="block-ink">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill" style="background:var(--mint)">The activation rule</span>
+        <h2 class="h2" style="margin:1.25rem 0 1.5rem">A drag only counts if it starts on the edge.</h2>
+        <p class="lede">Being near an edge is not enough. The gesture has to begin inside the edge strip, and it has to be the only finger on the trackpad. A touch that starts in the middle and later wanders to the edge can never activate the slider, for its whole life.</p>
+        <p class="lede" style="margin-top:1rem">It also stops listening for half a second after every keystroke, so typing never sets it off. Unglamorous rules, and most of the reason it feels like part of the system. This page behaves the same way — dragging from the middle does nothing.</p>
+      </div>
+      <svg class="scene" viewBox="0 0 420 300" role="img" aria-label="Diagram: a slide beginning on the edge is accepted; a slide beginning in the middle and moving to the edge is rejected.">
+        <rect x="20" y="24" width="380" height="252" rx="18" fill="#241f38" stroke="#fff6e9" stroke-width="3"/>
+        <rect x="20" y="24" width="58" height="252" rx="16" fill="url(#gWarm)" stroke="#fff6e9" stroke-width="3"/>
+        <!-- accepted path -->
+        <path d="M49 226V96" fill="none" stroke="#1fd0a3" stroke-width="5.5" stroke-linecap="round"/>
+        <path d="M40 108l9-13 9 13" fill="none" stroke="#1fd0a3" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="49" cy="226" r="9" fill="#1fd0a3" stroke="#191627" stroke-width="3"/>
+        <g transform="translate(96 196)">
+          <circle r="17" fill="#1fd0a3" stroke="#fff6e9" stroke-width="3"/>
+          <path d="M-7 1l5 5 9-10" fill="none" stroke="#191627" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </g>
+        <text x="124" y="202" fill="#fff6e9" font-family="'Space Mono',monospace" font-size="14" font-weight="700">STARTS ON EDGE</text>
+        <!-- rejected: begins in the middle, so it never activates -->
+        <text x="196" y="58" fill="#fff6e9" font-family="'Space Mono',monospace" font-size="14" font-weight="700">STARTS IN MIDDLE</text>
+        <path d="M256 88C222 104 184 120 156 136" fill="none" stroke="#ff5d73" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="10 9"/>
+        <circle cx="256" cy="88" r="9" fill="#ff5d73" stroke="#fff6e9" stroke-width="3"/>
+        <g transform="translate(140 148)">
+          <circle r="17" fill="#ff5d73" stroke="#fff6e9" stroke-width="3"/>
+          <path d="M-6-6l12 12M6-6l-12 12" fill="none" stroke="#fff6e9" stroke-width="4" stroke-linecap="round"/>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <!-- features -->
+  <section>
+    <div class="wrap">
+      <span class="pill" style="background:var(--coral);color:var(--paper)">Everything it does</span>
+      <h2 class="h2" style="margin:1.25rem 0 2.5rem">Twelve small<br>decisions.</h2>
+      <ul class="feat">
+        <li><span class="chip c-sun"><svg><use href="#i-slide"/></svg></span><b>Edge sliding</b><span>Left for brightness, right for volume. The sides are swappable.</span></li>
+        <li><span class="chip c-blue"><svg><use href="#i-hud"/></svg></span><b>The real system HUD</b><span>The display macOS draws, never an imitation of it.</span></li>
+        <li><span class="chip c-coral"><svg><use href="#i-tick"/></svg></span><b>Haptic ticks</b><span>Off, light, medium or strong, on value progress.</span></li>
+        <li><span class="chip c-mint"><svg><use href="#i-key"/></svg></span><b>Pause while typing</b><span>For half a second after each keystroke, gestures are refused.</span></li>
+        <li><span class="chip c-violet"><svg><use href="#i-fine"/></svg></span><b>Fine control</b><span>The same gesture, with a much smaller change.</span></li>
+        <li><span class="chip c-tang"><svg><use href="#i-quarter"/></svg></span><b>Bottom quarter only</b><span>Restrict where a gesture may start, if you catch it by accident.</span></li>
+        <li><span class="chip c-sun"><svg><use href="#i-mod"/></svg></span><b>Modifier requirement</b><span>Hold or toggle Control, Option, Command, Shift or Fn.</span></li>
+        <li><span class="chip c-blue"><svg><use href="#i-pointer"/></svg></span><b>Freeze the pointer</b><span>The cursor stays exactly where it was while you slide.</span></li>
+        <li><span class="chip c-coral"><svg><use href="#i-three"/></svg></span><b>Three-finger middle click</b><span>Deliberate taps only; swipes are left to macOS.</span></li>
+        <li><span class="chip c-mint"><svg><use href="#i-display"/></svg></span><b>External monitors</b><span>Brightness over DDC, writing VCP <code>0x10</code> with a capability probe.</span></li>
+        <li><span class="chip c-violet"><svg><use href="#i-login"/></svg></span><b>Launch at login</b><span>Registered properly through <code>SMAppService</code>.</span></li>
+        <li><span class="chip c-tang"><svg><use href="#i-menubar"/></svg></span><b>Menu bar only</b><span>One small glyph. No dock icon, no window.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- install -->
+  <svg class="wave" style="color:var(--mint)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V18c160 30 340-22 540-10s310 26 460 2 200 0 200 0v50z"/></svg>
+
+  <section class="block-mint" id="install">
+    <div class="wrap">
+      <span class="pill" style="background:var(--paper)">Install</span>
+      <h2 class="h2" style="margin:1.25rem 0 1.5rem">Free, and open<br>from top to bottom.</h2>
+
+      <div class="cmd">
+        <code id="brewcmd">brew install --cask --no-quarantine helgafinn/tap/glisse</code>
+        <button class="btn" data-copy="brew install --cask --no-quarantine helgafinn/tap/glisse" data-for="brewcmd">Copy</button>
+      </div>
+
+      <p class="lede">Or take the DMG from the <a href="https://github.com/helgafinn/glisse/releases">releases page</a>. MIT licensed. No trial, no licence key, no account, no telemetry, no analytics, and no network code of any kind — the app makes no outbound connection, ever.</p>
+      <p class="lede" style="margin-top:1rem"><strong>The main feature needs no permission at all.</strong> Sliding, volume and brightness work the first time you launch it, before you have granted anything. Accessibility is asked for only to draw the system HUD and for three optional extras, and both event taps it installs are listen&#8209;only, so they cannot swallow or alter a keystroke.</p>
+    </div>
+  </section>
+
+  <!-- honest part -->
+  <section class="block-paper2">
+    <div class="wrap">
+      <span class="pill" style="background:var(--coral);color:var(--paper)">The honest part</span>
+      <h2 class="h2" style="margin:1.25rem 0 2.25rem">What is not<br>finished yet.</h2>
+      <ul class="honest">
+        <li><b>Ad-hoc signed, not notarised</b><span>Notarising needs a paid Apple Developer account this project does not have. That is what <code>--no-quarantine</code> is for, and it costs something real: macOS forgets the Accessibility permission on every upgrade, so you grant it again.</span></li>
+        <li><b>No App Store version, and there cannot be one</b><span>Reading raw trackpad contacts, drawing the system HUD and talking to a monitor over I2C have no entitlements available. This is a program you choose to trust, and it should say so rather than implying a review vouched for it.</span></li>
+        <li><b>External monitor brightness is unverified</b><span>The DDC path is written and the reply parser follows the spec, but no second display was available to test it on.</span></li>
+        <li><b>Intel and Magic Trackpad are unverified</b><span>Those code paths exist and compile. Nobody has run them on that hardware yet.</span></li>
+      </ul>
+      <p class="lede" style="margin-top:2rem">Every private system call is listed in the README with the reason no public alternative exists. If you want the reasoning rather than the app, the <a href="writeup.html">write-up on the missing brightness API</a> is the long version.</p>
+    </div>
+  </section>
+
+</main>
+
+<svg class="wave" style="color:var(--ink)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V26c150 22 330-18 520-8s340 22 480 0 200-4 200-4v46z"/></svg>
+
+<footer class="block-ink">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div>
+        <div class="brandmark" style="margin-bottom:1rem">
+          <img src="assets/icon-256.png" alt="" width="34" height="34">
+          <b>Glissé</b>
+        </div>
+        <p class="label" style="opacity:.75">Trackpad edge sliders for macOS</p>
+      </div>
+      <nav aria-label="Project">
+        <p class="label" style="margin-bottom:0.5rem;color:var(--sun)">Project</p>
+        <a href="https://github.com/helgafinn/glisse">Source</a>
+        <a href="https://github.com/helgafinn/glisse/releases">Releases</a>
+        <a href="https://github.com/helgafinn/glisse/issues">Issues</a>
+        <a href="writeup.html">Write-up</a>
+      </nav>
+      <nav aria-label="Legal">
+        <p class="label" style="margin-bottom:0.5rem;color:var(--sun)">Legal</p>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms of Service</a>
+        <a href="https://github.com/helgafinn/glisse/blob/main/LICENSE">MIT Licence</a>
+      </nav>
+    </div>
+    <p class="foot-note">Glissé is free software. This site sets no cookies, runs no analytics, and loads nothing from a third party — the fonts are served from this repository. The brightness and volume you set on this page are a demonstration and never leave your browser.</p>
+  </div>
+</footer>
+
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/site.js"></script>
+</body>
+</html>

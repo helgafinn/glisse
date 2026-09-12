@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terms of Service — Glissé</title>
+<meta name="description" content="Glissé is free MIT-licensed software provided as-is. What that means, what the app uses, and what is not guaranteed.">
+<link rel="canonical" href="https://helgafinn.github.io/glisse/terms.html">
+<meta name="theme-color" content="#0b0e14">
+<link rel="icon" type="image/png" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<div class="marks" aria-hidden="true">
+  <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+</div>
+
+<main id="main" class="wrap doc">
+  <a class="backlink" href="./">&#8592; Glissé</a>
+
+  <p class="label" style="margin-bottom:1.25rem">Last updated 11 September 2026</p>
+  <h1>Terms of Service</h1>
+
+  <p>Glissé is free and open-source software. There is nothing to buy, no subscription, no licence key and no account, so these terms are short and describe what you are getting rather than what you owe.</p>
+
+  <h2>Licence</h2>
+
+  <p>The software is released under the <a href="https://github.com/helgafinn/glisse/blob/main/LICENSE">MIT Licence</a>. That licence is the binding agreement covering your use, copying, modification and redistribution of the code. If anything on this page appears to conflict with it, the MIT Licence text governs.</p>
+
+  <p>In short, you may use it for anything including commercially, modify it, and redistribute it, provided the copyright notice and licence text travel with it.</p>
+
+  <h2>No warranty</h2>
+
+  <p>As the licence states in capital letters, the software is provided <strong>"as is", without warranty of any kind</strong>, express or implied, and the authors are not liable for any claim, damages or other liability arising from it or its use. Nothing here creates a support obligation, an uptime commitment, or a promise that any particular feature will keep working.</p>
+
+  <h2>What you should know before installing</h2>
+
+  <p>These are not disclaimers hidden in small print; they are the actual conditions of the software, and they are stated on the <a href="./">home page</a> too.</p>
+
+  <ul>
+    <li><strong>It uses private Apple APIs.</strong> macOS exposes no public interface for setting screen brightness or for reading raw trackpad contacts, so the app resolves undocumented symbols at runtime. These can be changed or removed by Apple in any macOS update. When that happens the affected feature stops working; the app is written to degrade rather than crash, but the feature loss is real. Every such symbol is documented in the repository along with the reason no public alternative exists.</li>
+    <li><strong>It is ad-hoc signed, not notarised.</strong> Notarisation requires a paid Apple Developer account this project does not have. This is why installation uses <code>--no-quarantine</code>, and why macOS forgets the Accessibility permission each time you upgrade. You are choosing to run software that Apple has not reviewed or vouched for.</li>
+    <li><strong>It is not on the Mac App Store and cannot be.</strong> No entitlement exists for the capabilities it needs.</li>
+    <li><strong>Some paths are unverified.</strong> External-monitor brightness over DDC, Intel Macs, and the standalone Magic Trackpad are implemented but have not been tested on that hardware.</li>
+  </ul>
+
+  <p>Because the source is public, you are able to verify all of this yourself before running it, and building from source is a supported path.</p>
+
+  <h2>Downloads</h2>
+
+  <p>The only official distribution channels are the <a href="https://github.com/helgafinn/glisse/releases">GitHub Releases page</a> for this repository and the project's Homebrew tap. Builds obtained anywhere else are not ours and should not be trusted.</p>
+
+  <h2>This website</h2>
+
+  <p>The site is provided for information and is served as static files with no accounts and no user submissions. The edge-drag brightness and volume on the home page are a demonstration running entirely in your browser; they do not touch your system settings.</p>
+
+  <h2>Acceptable use</h2>
+
+  <p>Do not use the project's issue tracker for spam, harassment, or anything unlawful. Contributions are welcome and are accepted under the same MIT Licence as the rest of the project.</p>
+
+  <h2>Changes</h2>
+
+  <p>Revisions to this page are committed to the project repository, so the history is public. The date at the top reflects the current version.</p>
+
+  <h2>Contact</h2>
+
+  <p>Use the <a href="https://github.com/helgafinn/glisse/issues">issue tracker</a>. Bug reports that include your macOS version, your Mac model and the output of <code>Glisse --probe</code> are the ones that get fixed fastest.</p>
+</main>
+
+<footer class="wrap">
+  <div class="foot-grid">
+    <div>
+      <div class="brandmark" style="margin-bottom:1rem">
+        <img src="assets/icon-256.png" alt="" width="26" height="26">
+        <b>Glissé</b>
+      </div>
+      <p class="label">Trackpad edge sliders for macOS</p>
+    </div>
+    <nav aria-label="Project">
+      <p class="label" style="margin-bottom:0.4rem">Project</p>
+      <a href="./">Home</a>
+      <a href="https://github.com/helgafinn/glisse">Source</a>
+      <a href="writeup.html">Write-up</a>
+    </nav>
+    <nav aria-label="Legal">
+      <p class="label" style="margin-bottom:0.4rem">Legal</p>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="https://github.com/helgafinn/glisse/blob/main/LICENSE">MIT Licence</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>

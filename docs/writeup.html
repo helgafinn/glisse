@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>macOS has no public API for screen brightness — Glissé</title>
+<meta name="description" content="There is no public macOS API to change screen brightness. What working around it costs: runtime symbol resolution, an unpublished struct layout, and three things the hardware said that the docs did not.">
+<link rel="canonical" href="https://helgafinn.github.io/glisse/writeup.html">
+<meta property="og:type" content="article">
+<meta property="og:title" content="macOS has no public API for screen brightness">
+<meta property="og:description" content="What working around a missing platform API actually costs.">
+<meta name="theme-color" content="#0b0e14">
+<link rel="icon" type="image/png" href="assets/icon-256.png">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+
+<div class="marks" aria-hidden="true">
+  <span class="tl"></span><span class="tr"></span><span class="bl"></span><span class="br"></span>
+</div>
+
+<main id="main" class="wrap doc">
+  <a class="backlink" href="./">&#8592; Glissé</a>
+
+  <p class="label" style="margin-bottom:1.25rem">Write-up</p>
+  <h1>macOS has no public API for screen brightness</h1>
+
+  <p>Try to write a Mac app that changes the screen brightness. Not reads it — changes it. You will find nothing in AppKit, nothing in Quartz, nothing in ScreenCaptureKit. <code>NSScreen</code> will tell you a display's colour space, its frame, its refresh rate, and its maximum EDR headroom. It will not let you dim it.</p>
+
+  <p>This is not an oversight that has gone unnoticed for a year. It is the state of the platform, and working around it teaches you something about what "private API" actually costs.</p>
+
+  <h2>What used to work</h2>
+
+  <p>On Intel Macs the built-in backlight was an IOKit display parameter. You opened the display service and set a float:</p>
+
+<pre><code>IODisplaySetFloatParameter(service, kNilOptions,
+                           CFSTR(kIODisplayBrightnessKey), level);</code></pre>
+
+  <p>Not documented as a brightness API exactly, but it was public IOKit, it worked, and half the utilities on the Mac used it.</p>
+
+  <p>On Apple Silicon it does nothing. The backlight is no longer exposed as an <code>IODisplay</code> parameter, so there is no service to set the key on. The call succeeds in the sense that it does not crash, and the screen stays exactly as bright as it was.</p>
+
+  <p>The replacement is <code>DisplayServices</code>, a private framework:</p>
+
+<pre><code>DisplayServicesGetBrightness
+DisplayServicesSetBrightness
+DisplayServicesCanChangeBrightness
+DisplayServicesGetLinearBrightness
+DisplayServicesSetLinearBrightness</code></pre>
+
+  <p>These work. They are also entirely undeclared — no header ships in any SDK.</p>
+
+  <h2>External displays have no API at all</h2>
+
+  <p>The built-in panel is the good case. For an external monitor there has never been a macOS API for brightness, public or private, because brightness on an external display is not a macOS concept. It is a property of the monitor, reached over the display cable through <strong>DDC/CI</strong> — a two-wire I2C channel defined by VESA, where you write a feature code and a value.</p>
+
+  <p>Brightness is VCP feature <code>0x10</code>. Writing it means getting at the I2C channel, which on Apple Silicon means:</p>
+
+<pre><code>IOAVServiceCreateWithService
+IOAVServiceReadI2C
+IOAVServiceWriteI2C</code></pre>
+
+  <p>Undeclared IOKit symbols. On Intel it was <code>IOI2CSendRequest</code>, also undeclared. There is no third option. Every external-brightness utility on the Mac — every single one — is doing this.</p>
+
+  <p>So the situation is: the obvious feature is unreachable publicly on the built-in display, and unreachable by any means except an undocumented I2C path on external ones.</p>
+
+  <h2>Using private symbols without shipping a time bomb</h2>
+
+  <p>The naive approach is to declare the symbols and link against them. Do that and the day Apple removes one, your app does not degrade — it fails to launch. <code>dyld</code> aborts the process before <code>main</code> runs, and the user sees a crash with no explanation.</p>
+
+  <p>The alternative is to resolve everything at runtime:</p>
+
+<pre><code>void *handle = dlopen("/System/Library/PrivateFrameworks/"
+                      "DisplayServices.framework/DisplayServices",
+                      RTLD_LAZY);
+SetBrightnessFn set = dlsym(handle, "DisplayServicesSetBrightness");
+if (!set) { /* feature unavailable, app still runs */ }</code></pre>
+
+  <p>Now a removed symbol costs you one feature instead of the whole app. The same applies to Objective-C classes reached by name — <code>NSClassFromString</code>, then <code>respondsToSelector:</code> before every call, wrapped so a signature change raises rather than corrupts.</p>
+
+  <p>This is not defensive padding. It is the only honest way to depend on something you were never promised.</p>
+
+  <h2>The harder problem: a struct whose layout is not published</h2>
+
+  <p>Reading raw trackpad contacts needs <code>MultitouchSupport</code>, because the public <code>NSTouch</code> only delivers touches to the <em>focused</em> application. A background utility has no public way to see the trackpad at all.</p>
+
+  <p>The callback hands you an array of <code>MTTouch</code>. Its layout is unpublished and has changed size across releases. Guessing wrong does not throw — it silently hands you garbage coordinates, which for something that moves the screen brightness is worse than failing.</p>
+
+  <p>What works is treating the layout as a hypothesis and scoring it:</p>
+
+  <ul>
+    <li>Start from the canonical layout: stride 96, timestamp at +8, path index +16, state +20, normalised position +32.</li>
+    <li>Score every frame. State must be 1–8. Path index 0–128. Normalised x and y within −0.15…1.15. Size finite. Per-contact timestamp within two seconds of the frame timestamp.</li>
+    <li><strong>A frame with two or more contacts that parses cleanly is real corroboration</strong>, because a wrong stride misaligns contact 2 onward. Three such frames promote the layout from <em>assumed</em> to <em>validated</em>.</li>
+    <li>On repeated failure, re-derive within bounds: locate the timestamp offset by matching the known frame timestamp, then score stride × position-offset candidates.</li>
+    <li>If that fails too, report layout failure and fall back to the public <code>NSTouch</code> path. Reduced behaviour, but working.</li>
+  </ul>
+
+  <p>The multi-contact check is the load-bearing part. One contact parsing plausibly proves very little; a wrong stride that still produces sane values for four contacts in a row is not a coincidence you need to plan for.</p>
+
+  <h2>Three things the hardware said that the documentation did not</h2>
+
+  <p>Every one of these was measured on a real machine and each one changed the design.</p>
+
+  <p><strong><code>MTDeviceIsAlive</code> returns false before <code>MTDeviceStart</code>.</strong> Use it as an enumeration filter — which reads as the obviously correct thing to do — and you discard every device on the system, then silently fall back to the degraded path. The name suggests a liveness check. It is not usable as one at enumeration time.</p>
+
+  <p><strong><code>CoreDisplay_Display_GetUserBrightness</code> returns a constant <code>1.0</code></strong> regardless of the actual backlight, and its setter has no observable effect. It looks like a cleaner alternative to <code>DisplayServices</code> and it is inert. Any code that trusts it reports full brightness forever. The only safe use is as a fallback behind a probe that cross-checks it against <code>DisplayServices</code> and rejects it when they disagree.</p>
+
+  <p><strong><code>MTDeviceGetGUID</code> does not return a UUID.</strong> It returns the device ID in the first byte and zeros for the rest. Key anything on it and every trackpad collides.</p>
+
+  <p>None of this is discoverable by reading. It is only discoverable by instrumenting the calls and comparing them against what the screen actually did.</p>
+
+  <h2>What this means if you are considering it</h2>
+
+  <p>Two things are worth being clear about.</p>
+
+  <p><strong>Private API use is a real ongoing liability</strong>, not a one-time cheat. Every symbol is a thing that can vanish in a point release. The mitigation is runtime resolution and graceful degradation, and the honest description of the result is "this feature may stop working", not "this is fine".</p>
+
+  <p><strong>It also means no App Store.</strong> There is no entitlement for raw trackpad contacts, none for the system HUD, none for I2C. An app doing this is a user-space process the user chooses to trust, and it should say so plainly rather than implying a review process vouched for it.</p>
+
+  <p>That trade is only worth making when the feature genuinely cannot exist otherwise. Brightness control is one of those cases: the platform simply does not offer it.</p>
+
+  <hr class="rule">
+
+  <p>I ended up here writing <a href="https://github.com/helgafinn/glisse">Glissé</a>, which puts brightness and volume on the trackpad's left and right edges — glide the left edge to dim, the right to change volume, with the real system HUD rather than an imitation of it.</p>
+
+  <p><strong>It is free and open source.</strong> MIT licensed, no payment, no trial, no licence key, no accounts, no telemetry, no analytics, no network code of any kind. Install it with:</p>
+
+<pre><code>brew install --cask --no-quarantine helgafinn/tap/glisse</code></pre>
+
+  <p>The <code>--no-quarantine</code> is not a trick — the build is ad-hoc signed rather than notarised, because notarisation needs a paid Apple Developer account this project does not have. Gatekeeper would otherwise refuse to open it. One consequence worth knowing before you install: because the signature is ad-hoc, macOS forgets the Accessibility grant on each upgrade and you have to give it again.</p>
+
+  <p>Every private symbol it touches is documented in the README with the reason no public alternative exists, including the parts that are unverified — the Intel paths are written but have only been tested on Apple Silicon. If you only want the technique rather than the app, <code>Sources/GlissePrivate/</code> is the interesting directory.</p>
+</main>
+
+<footer class="wrap">
+  <div class="foot-grid">
+    <div>
+      <div class="brandmark" style="margin-bottom:1rem">
+        <img src="assets/icon-256.png" alt="" width="26" height="26">
+        <b>Glissé</b>
+      </div>
+      <p class="label">Trackpad edge sliders for macOS</p>
+    </div>
+    <nav aria-label="Project">
+      <p class="label" style="margin-bottom:0.4rem">Project</p>
+      <a href="./">Home</a>
+      <a href="https://github.com/helgafinn/glisse">Source</a>
+      <a href="https://github.com/helgafinn/glisse/releases">Releases</a>
+    </nav>
+    <nav aria-label="Legal">
+      <p class="label" style="margin-bottom:0.4rem">Legal</p>
+      <a href="privacy.html">Privacy Policy</a>
+      <a href="terms.html">Terms of Service</a>
+      <a href="https://github.com/helgafinn/glisse/blob/main/LICENSE">MIT Licence</a>
+    </nav>
+  </div>
+</footer>
+
+</body>
+</html>
