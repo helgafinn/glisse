@@ -56,6 +56,9 @@
 
   --rail-w: 4.25rem;
   --ease: cubic-bezier(0.23, 1, 0.32, 1);
+  /* Looping illustration motion uses a symmetric in-out ease, written as a
+     literal inside @keyframes because var() in animation-timing-function is
+     not honoured reliably across engines. Expo-out reads as a snap here. */
   --page-max: 80rem;
   --border: 2.5px solid var(--ink);
   --shadow: 6px 6px 0 var(--ink);
@@ -64,6 +67,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+html.is-wheel-scrolling { scroll-behavior: auto; }
 
 body {
   margin: 0;
@@ -469,3 +473,381 @@ footer nav a:hover { opacity: 1; text-decoration: underline; text-decoration-col
   transition: opacity 160ms var(--ease), translate 160ms var(--ease);
 }
 #toast.show { opacity: 1; translate: -50% 0; }
+
+/* ---------- product-led motion system ---------- */
+
+/* Illustration motion is decorative only; the live fixed rails remain the input surface. */
+.hero-scene,
+.edge-illo,
+.activation-scene,
+.motion-wave {
+  pointer-events: none;
+}
+
+.hero-scene {
+  --stage-x: 0px;
+  --stage-y: 0px;
+  --tilt-x: 0deg;
+  --tilt-y: 0deg;
+  --back-x: 0px;
+  --back-y: 0px;
+  --device-x: 0px;
+  --device-y: 0px;
+  --front-x: 0px;
+  --front-y: 0px;
+  perspective: 900px;
+}
+
+.hero-stage,
+.hero-depth-layer,
+.hero-loop {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.hero-stage {
+  transform: translate3d(var(--stage-x), var(--stage-y), 0)
+    rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  transform-style: preserve-3d;
+}
+
+.hero-depth-layer--shadow {
+  transform: translate(var(--back-x), var(--back-y));
+}
+.hero-depth-layer--violet,
+.hero-depth-layer--sky {
+  transform: translate(var(--front-x), var(--front-y));
+}
+.hero-depth-layer--device {
+  transform: translate(var(--device-x), var(--device-y));
+}
+.hero-depth-layer--gesture {
+  transform: translate(var(--front-x), var(--front-y));
+}
+
+/* One 8.4s product story: brightness first, then volume, with deliberate rests. */
+.hero-thumb--brightness {
+  animation: hero-brightness-thumb 9.2s linear infinite both;
+}
+.hero-finger {
+  animation: hero-brightness-finger 9.2s linear infinite both;
+}
+.hero-sun {
+  animation: hero-sun-response 9.2s linear infinite both;
+}
+.hero-sun-rays {
+  animation: hero-sun-rays 9.2s linear infinite both;
+}
+.hero-gesture-ticks {
+  animation: hero-gesture-ticks 9.2s linear infinite both;
+}
+.hero-thumb--volume {
+  animation: hero-volume-thumb 9.2s linear infinite both;
+}
+.hero-speaker {
+  animation: hero-speaker-response 9.2s linear infinite both;
+}
+.hero-speaker-waves {
+  transform-origin: left center;
+  animation: hero-speaker-waves 9.2s linear infinite both;
+}
+
+/* Each segment carries its own ease so the travel accelerates and settles
+   like a real finger instead of snapping to every keyframe stop. */
+@keyframes hero-brightness-thumb {
+  0%   { transform: translateY(12px); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  26%  { transform: translateY(-38px); animation-timing-function: linear; }
+  44%  { transform: translateY(-38px); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  62%  { transform: translateY(12px); animation-timing-function: linear; }
+  100% { transform: translateY(12px); }
+}
+@keyframes hero-brightness-finger {
+  0%   { transform: translateY(12px) rotate(0deg); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  26%  { transform: translateY(-38px) rotate(-1.5deg); animation-timing-function: linear; }
+  44%  { transform: translateY(-38px) rotate(-1.5deg); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  62%  { transform: translateY(12px) rotate(0deg); animation-timing-function: linear; }
+  100% { transform: translateY(12px) rotate(0deg); }
+}
+/* The sun tracks the same travel, so brightness reads as the cause. */
+@keyframes hero-sun-response {
+  0%   { transform: rotate(-3deg) scale(0.97); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  26%  { transform: rotate(8deg) scale(1.06); animation-timing-function: linear; }
+  44%  { transform: rotate(8deg) scale(1.06); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  62%  { transform: rotate(-3deg) scale(0.97); animation-timing-function: linear; }
+  100% { transform: rotate(-3deg) scale(0.97); }
+}
+@keyframes hero-sun-rays {
+  0%   { opacity: 0.5; transform: scale(0.93); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  26%  { opacity: 1; transform: scale(1.07); animation-timing-function: linear; }
+  44%  { opacity: 1; transform: scale(1.07); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  62%  { opacity: 0.5; transform: scale(0.93); animation-timing-function: linear; }
+  100% { opacity: 0.5; transform: scale(0.93); }
+}
+/* Speed marks only exist while the finger is actually travelling. */
+@keyframes hero-gesture-ticks {
+  0%   { opacity: 0; transform: translateY(10px) scaleX(0.8); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  10%  { opacity: 0.9; transform: translateY(4px) scaleX(1); }
+  22%  { opacity: 0.5; transform: translateY(-6px) scaleX(0.9); animation-timing-function: linear; }
+  30%  { opacity: 0; transform: translateY(-10px) scaleX(0.82); }
+  62%  { opacity: 0; transform: translateY(10px) scaleX(0.8); }
+  100% { opacity: 0; transform: translateY(10px) scaleX(0.8); }
+}
+/* Volume takes over in the back half of the loop, so only one edge acts at a time. */
+@keyframes hero-volume-thumb {
+  0%   { transform: translateY(0); animation-timing-function: linear; }
+  66%  { transform: translateY(0); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  80%  { transform: translateY(-26px); animation-timing-function: linear; }
+  90%  { transform: translateY(-26px); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  100% { transform: translateY(0); }
+}
+@keyframes hero-speaker-response {
+  0%   { transform: scale(1) rotate(0deg); animation-timing-function: linear; }
+  66%  { transform: scale(1) rotate(0deg); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  80%  { transform: scale(1.05) rotate(-1.5deg); animation-timing-function: linear; }
+  90%  { transform: scale(1.05) rotate(-1.5deg); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+@keyframes hero-speaker-waves {
+  0%   { opacity: 0.5; transform: scaleX(0.9); animation-timing-function: linear; }
+  66%  { opacity: 0.5; transform: scaleX(0.9); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  80%  { opacity: 1; transform: scaleX(1.08); animation-timing-function: linear; }
+  90%  { opacity: 1; transform: scaleX(1.08); animation-timing-function: cubic-bezier(0.45, 0.05, 0.35, 1); }
+  100% { opacity: 0.5; transform: scaleX(0.9); }
+}
+
+/* JS owns these explicit lifecycle states. Pausing never changes a real rail value. */
+.hero.is-motion-paused .confetti svg,
+.hero.is-motion-paused .nudge-arrow,
+.nudge.done .nudge-arrow,
+.hero-scene.is-motion-paused .hero-loop {
+  animation-play-state: paused;
+}
+.hero-scene.is-user-owned .hero-loop {
+  animation: none;
+}
+
+/* Content is visible by default. JS adds pending classes only after the observer exists. */
+.reveal-item {
+  --reveal-delay: 0ms;
+}
+.reveal-item.is-reveal-pending:not(.is-revealed) {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.reveal-item.is-reveal-pending.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 520ms var(--ease) var(--reveal-delay),
+    transform 700ms var(--ease) var(--reveal-delay);
+}
+
+/* The two edge diagrams play once as they enter. */
+.edge-illo .edge-sun > circle,
+.edge-illo .edge-sun > g,
+.edge-speaker-bar,
+.edge-speaker-wave,
+.edge-brightness-arrow,
+.edge-brightness-path {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.edge-speaker-bar { transform-origin: center bottom; }
+
+.edge-illo--brightness.is-motion-pending:not(.is-animated) .edge-sun > circle,
+.edge-illo--brightness.is-motion-pending:not(.is-animated) .edge-sun > g {
+  opacity: 0.35;
+  transform: scale(0.86);
+}
+.edge-illo--brightness.is-motion-pending:not(.is-animated) .edge-brightness-path {
+  stroke-dashoffset: 60;
+}
+.edge-illo--brightness.is-motion-pending:not(.is-animated) .edge-brightness-arrow {
+  opacity: 0;
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+}
+.edge-illo--brightness.is-animated .edge-sun > circle,
+.edge-illo--brightness.is-animated .edge-sun > g {
+  animation: edge-sun-in 720ms var(--ease) both;
+}
+.edge-illo--brightness.is-animated .edge-sun--bright > circle,
+.edge-illo--brightness.is-animated .edge-sun--bright > g {
+  animation-delay: 180ms;
+}
+.edge-illo--brightness.is-animated .edge-brightness-path {
+  animation: edge-dash-travel 800ms var(--ease) 130ms both;
+}
+.edge-illo--brightness.is-animated .edge-brightness-arrow {
+  animation: edge-arrow-draw 620ms var(--ease) 260ms both;
+}
+
+.edge-illo--volume.is-motion-pending:not(.is-animated) .edge-speaker-bar {
+  transform: scaleY(0.16);
+}
+.edge-illo--volume.is-motion-pending:not(.is-animated) .edge-speaker-wave {
+  opacity: 0;
+  stroke-dasharray: 90;
+  stroke-dashoffset: 90;
+}
+.edge-illo--volume.is-animated .edge-speaker-bar {
+  animation: edge-bar-rise 720ms var(--ease) var(--bar-delay, 0ms) both;
+}
+.edge-illo--volume.is-animated .edge-speaker-wave {
+  animation: edge-wave-draw 760ms var(--ease) 220ms both;
+}
+
+@keyframes edge-sun-in {
+  0%   { opacity: 0.35; transform: scale(0.86) rotate(-8deg); }
+  70%  { opacity: 1; transform: scale(1.08) rotate(3deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+@keyframes edge-dash-travel {
+  from { stroke-dashoffset: 60; opacity: 0.45; }
+  to   { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes edge-arrow-draw {
+  from { opacity: 0; stroke-dasharray: 30; stroke-dashoffset: 30; }
+  to   { opacity: 1; stroke-dasharray: 30; stroke-dashoffset: 0; }
+}
+@keyframes edge-bar-rise {
+  0%   { transform: scaleY(0.16); }
+  72%  { transform: scaleY(1.08); }
+  100% { transform: scaleY(1); }
+}
+@keyframes edge-wave-draw {
+  from { opacity: 0; stroke-dasharray: 90; stroke-dashoffset: 90; }
+  to   { opacity: 1; stroke-dasharray: 90; stroke-dashoffset: 0; }
+}
+
+/* Activation paths trace once, reinforcing that origin—not proximity—is the rule. */
+.activation-path,
+.activation-arrow,
+.activation-origin,
+.activation-result {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.activation-scene.is-motion-pending:not(.is-animated) .activation-path,
+.activation-scene.is-motion-pending:not(.is-animated) .activation-arrow {
+  opacity: 0;
+}
+.activation-scene.is-motion-pending:not(.is-animated) .activation-origin,
+.activation-scene.is-motion-pending:not(.is-animated) .activation-result {
+  opacity: 0.25;
+}
+.activation-scene.is-animated .activation-path--accepted {
+  animation: activation-path-accepted 900ms var(--ease) 80ms both;
+}
+.activation-scene.is-animated .activation-arrow--accepted {
+  animation: activation-arrow-in 420ms var(--ease) 780ms both;
+}
+.activation-scene.is-animated .activation-origin--accepted,
+.activation-scene.is-animated .activation-result--accepted {
+  animation: activation-marker-in 420ms var(--ease) 120ms both;
+}
+.activation-scene.is-animated .activation-path--rejected {
+  animation: activation-path-rejected 980ms var(--ease) 620ms both;
+}
+.activation-scene.is-animated .activation-origin--rejected,
+.activation-scene.is-animated .activation-result--rejected {
+  animation: activation-marker-in 420ms var(--ease) 700ms both;
+}
+
+@keyframes activation-path-accepted {
+  from { opacity: 0; stroke-dasharray: 180; stroke-dashoffset: 180; }
+  to   { opacity: 1; stroke-dasharray: 180; stroke-dashoffset: 0; }
+}
+@keyframes activation-path-rejected {
+  0%   { opacity: 0; stroke-dasharray: 190 190; stroke-dashoffset: 190; }
+  88%  { opacity: 1; stroke-dasharray: 190 190; stroke-dashoffset: 0; }
+  100% { opacity: 1; stroke-dasharray: 10 9; stroke-dashoffset: 0; }
+}
+@keyframes activation-arrow-in {
+  from { opacity: 0; stroke-dasharray: 40; stroke-dashoffset: 40; }
+  to   { opacity: 1; stroke-dasharray: 40; stroke-dashoffset: 0; }
+}
+@keyframes activation-marker-in {
+  from { opacity: 0.25; }
+  to   { opacity: 1; }
+}
+
+/* Divider waves breathe into place once rather than looping forever. */
+.motion-wave path {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+}
+.motion-wave.is-motion-pending:not(.is-animated) path {
+  opacity: 0.84;
+  transform: translateY(7px) scaleY(0.9);
+}
+.motion-wave.is-animated path {
+  animation: wave-settle 900ms var(--ease) both;
+}
+@keyframes wave-settle {
+  0%   { opacity: 0.84; transform: translateY(7px) scaleY(0.9); }
+  70%  { opacity: 1; transform: translateY(-1px) scaleY(1.015); }
+  100% { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+/* A tiny, non-looping response for pointer-capable cards only. */
+@media (hover: hover) and (pointer: fine) {
+  .feat li {
+    transition: transform 140ms var(--ease), box-shadow 140ms var(--ease);
+  }
+  .feat li:hover {
+    transform: translateY(-3px) rotate(-0.2deg);
+    box-shadow: 7px 8px 0 var(--ink);
+    transition-duration: 200ms;
+  }
+}
+
+/* Live reduced-motion changes land on complete, readable static art. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-stage,
+  .hero-depth-layer,
+  .hero-loop,
+  .edge-illo .edge-sun > circle,
+  .edge-illo .edge-sun > g,
+  .edge-speaker-bar,
+  .motion-wave path,
+  .reveal-item {
+    animation: none !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .edge-illo .edge-sun > circle,
+  .edge-illo .edge-sun > g,
+  .motion-wave path,
+  .reveal-item {
+    opacity: 1 !important;
+  }
+
+  .edge-speaker-wave,
+  .edge-brightness-path,
+  .edge-brightness-arrow,
+  .activation-path,
+  .activation-arrow {
+    animation: none !important;
+    transition: none !important;
+    opacity: 1 !important;
+    stroke-dashoffset: 0 !important;
+  }
+
+  .edge-brightness-arrow,
+  .activation-arrow--accepted {
+    stroke-dasharray: none !important;
+  }
+  .activation-path--accepted {
+    stroke-dasharray: none !important;
+  }
+  .activation-path--rejected {
+    stroke-dasharray: 10 9 !important;
+  }
+  .activation-origin,
+  .activation-result {
+    animation: none !important;
+    opacity: 1 !important;
+  }
+}

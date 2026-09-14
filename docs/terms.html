@@ -40,7 +40,7 @@
 
   <ul>
     <li><strong>It uses private Apple APIs.</strong> macOS exposes no public interface for setting screen brightness or for reading raw trackpad contacts, so the app resolves undocumented symbols at runtime. These can be changed or removed by Apple in any macOS update. When that happens the affected feature stops working; the app is written to degrade rather than crash, but the feature loss is real. Every such symbol is documented in the repository along with the reason no public alternative exists.</li>
-    <li><strong>It is ad-hoc signed, not notarised.</strong> Notarisation requires a paid Apple Developer account this project does not have. This is why installation uses <code>--no-quarantine</code>, and why macOS forgets the Accessibility permission each time you upgrade. You are choosing to run software that Apple has not reviewed or vouched for.</li>
+    <li><strong>It is ad-hoc signed, not notarised.</strong> Notarisation requires a paid Apple Developer account this project does not have. Homebrew can install it normally, but Gatekeeper may require you to right-click Glissé in <code>/Applications</code> and choose <strong>Open</strong> on first launch. The ad-hoc signature is also why macOS forgets the Accessibility permission each time you upgrade. You are choosing to run software that Apple has not reviewed or vouched for.</li>
     <li><strong>It is not on the Mac App Store and cannot be.</strong> No entitlement exists for the capabilities it needs.</li>
     <li><strong>Some paths are unverified.</strong> External-monitor brightness over DDC, Intel Macs, and the standalone Magic Trackpad are implemented but have not been tested on that hardware.</li>
   </ul>

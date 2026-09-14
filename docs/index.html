@@ -117,72 +117,116 @@
       </div>
 
       <!-- hero scene: a trackpad, lit at both edges -->
-      <svg class="scene" viewBox="0 0 460 400" role="img" aria-label="Illustration of a trackpad with the left edge lit warm for brightness and the right edge lit blue for volume, a finger sliding down the left edge.">
-        <ellipse cx="230" cy="366" rx="176" ry="17" fill="#191627" opacity=".12"/>
-        <!-- playful colour blob behind the machine -->
-        <circle cx="368" cy="104" r="72" fill="#c7b3ff"/>
-        <circle cx="86" cy="290" r="54" fill="#8cc9ff"/>
-        <!-- laptop base -->
-        <rect x="34" y="52" width="392" height="286" rx="26" fill="#fff" stroke="#191627" stroke-width="3.5"/>
-        <!-- trackpad -->
-        <rect x="74" y="90" width="312" height="212" rx="16" fill="#fff6e9" stroke="#191627" stroke-width="3.5"/>
-        <!-- edge strips -->
-        <rect x="74" y="90" width="46" height="212" rx="14" fill="url(#gWarm)" stroke="#191627" stroke-width="3.5"/>
-        <rect x="340" y="90" width="46" height="212" rx="14" fill="url(#gCool)" stroke="#191627" stroke-width="3.5"/>
-        <!-- tick ladders -->
-        <g stroke="#191627" stroke-width="2.5" opacity=".35">
-          <path d="M88 118h18M88 146h18M88 174h18M88 202h18M88 230h18M88 258h18"/>
-        </g>
-        <g stroke="#fff6e9" stroke-width="2.5" opacity=".6">
-          <path d="M354 118h18M354 146h18M354 174h18M354 202h18M354 230h18M354 258h18"/>
-        </g>
-        <!-- thumbs -->
-        <rect x="80" y="188" width="34" height="13" rx="6.5" fill="#fff6e9" stroke="#191627" stroke-width="3" transform="rotate(-20 97 194)"/>
-        <rect x="346" y="150" width="34" height="13" rx="6.5" fill="#fff6e9" stroke="#191627" stroke-width="3" transform="rotate(-20 363 156)"/>
-        <!-- sun over the warm edge -->
-        <g transform="translate(158 132)">
-          <circle r="20" fill="#ffc02e" stroke="#191627" stroke-width="3"/>
-          <g stroke="#191627" stroke-width="3" stroke-linecap="round">
-            <path d="M0-31v9M0 22v9M-31 0h9M22 0h9M-22-22l6 6M16 16l6 6M22-22l-6 6M-16 16l-6 6"/>
+      <svg class="scene hero-scene" viewBox="0 0 460 400" role="img" aria-label="Illustration of a trackpad with the left edge lit warm for brightness and the right edge lit blue for volume, a finger sliding down the left edge.">
+        <g class="hero-stage">
+          <ellipse class="hero-depth-layer hero-depth-layer--shadow" cx="230" cy="366" rx="176" ry="17" fill="#191627" opacity=".12"/>
+          <!-- playful colour blobs behind the machine -->
+          <circle class="hero-depth-layer hero-depth-layer--violet" cx="368" cy="104" r="72" fill="#c7b3ff"/>
+          <circle class="hero-depth-layer hero-depth-layer--sky" cx="86" cy="290" r="54" fill="#8cc9ff"/>
+
+          <g class="hero-depth-layer hero-depth-layer--device">
+            <!-- laptop base -->
+            <rect x="34" y="52" width="392" height="286" rx="26" fill="#fff" stroke="#191627" stroke-width="3.5"/>
+            <!-- trackpad -->
+            <rect x="74" y="90" width="312" height="212" rx="16" fill="#fff6e9" stroke="#191627" stroke-width="3.5"/>
+            <!-- edge strips -->
+            <rect x="74" y="90" width="46" height="212" rx="14" fill="url(#gWarm)" stroke="#191627" stroke-width="3.5"/>
+            <rect x="340" y="90" width="46" height="212" rx="14" fill="url(#gCool)" stroke="#191627" stroke-width="3.5"/>
+            <!-- tick ladders -->
+            <g stroke="#191627" stroke-width="2.5" opacity=".35">
+              <path d="M88 118h18M88 146h18M88 174h18M88 202h18M88 230h18M88 258h18"/>
+            </g>
+            <g stroke="#fff6e9" stroke-width="2.5" opacity=".6">
+              <path d="M354 118h18M354 146h18M354 174h18M354 202h18M354 230h18M354 258h18"/>
+            </g>
+            <!-- thumbs -->
+            <g class="hero-thumb hero-thumb--brightness hero-loop">
+              <rect x="80" y="199.5" width="34" height="13" rx="6.5" fill="#fff6e9" stroke="#191627" stroke-width="3" transform="rotate(-20 97 206)"/>
+            </g>
+            <g class="hero-thumb hero-thumb--volume hero-loop">
+              <rect x="346" y="150" width="34" height="13" rx="6.5" fill="#fff6e9" stroke="#191627" stroke-width="3" transform="rotate(-20 363 156)"/>
+            </g>
+            <!-- sun over the warm edge -->
+            <g class="hero-sun hero-loop">
+              <g transform="translate(228 124)">
+                <circle r="20" fill="#ffc02e" stroke="#191627" stroke-width="3"/>
+                <g class="hero-sun-rays hero-loop" stroke="#191627" stroke-width="3" stroke-linecap="round">
+                  <path d="M0-31v9M0 22v9M-31 0h9M22 0h9M-22-22l6 6M16 16l6 6M22-22l-6 6M-16 16l-6 6"/>
+                </g>
+              </g>
+            </g>
+            <!-- speaker over the cool edge -->
+            <g class="hero-speaker hero-loop">
+              <g transform="translate(268 232)">
+                <!-- Box and cone drawn as separate primitives, outline first then
+                     fills, so the speaker keeps one clean silhouette. -->
+                <g fill="none" stroke="#191627" stroke-width="6" stroke-linejoin="round">
+                  <rect x="-22" y="-8" width="13" height="16" rx="3.5"/>
+                  <path d="M-11-7 0-19v38l-11-12z"/>
+                </g>
+                <g fill="#2c4bff">
+                  <rect x="-22" y="-8" width="13" height="16" rx="3.5"/>
+                  <path d="M-11-7 0-19v38l-11-12z"/>
+                </g>
+                <g class="hero-speaker-waves hero-loop" fill="none" stroke="#191627" stroke-width="3" stroke-linecap="round">
+                  <path d="M7-8a10 10 0 0 1 0 16"/><path d="M16-15a19 19 0 0 1 0 30"/>
+                </g>
+              </g>
+            </g>
           </g>
-        </g>
-        <!-- speaker over the cool edge -->
-        <g transform="translate(268 236)">
-          <path d="M-16-14-4-4h-9a3 3 0 0 0-3 3v4a3 3 0 0 0 3 3h9L-4 16z" fill="#2c4bff" stroke="#191627" stroke-width="3" stroke-linejoin="round"/>
-          <g fill="none" stroke="#191627" stroke-width="3" stroke-linecap="round">
-            <path d="M4-7a9 9 0 0 1 0 14"/><path d="M12-13a17 17 0 0 1 0 26"/>
+
+          <g class="hero-depth-layer hero-depth-layer--gesture">
+            <!-- finger sliding the warm edge -->
+            <g class="hero-finger hero-loop">
+              <!-- Tabler Icons `hand-finger-left` v3.46.0 (MIT).
+                   Original path anatomy is unchanged; only pose, scale, colour,
+                   and the Glissé sleeve are adapted. Source and license are
+                   vendored under assets/vendor/tabler-icons/. -->
+              <g class="hero-hand-component" transform="translate(87 174) scale(4)">
+                <rect x="19.2" y="9.6" width="4.4" height="10.8" rx="1.4"
+                      fill="#46577a" stroke="#191627" stroke-width=".9"/>
+                <g fill="none" stroke="#fff6e9" stroke-width="3.4"
+                   stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 8h-8.5a1.5 1.5 0 0 0 0 3h7.5"/>
+                  <path d="M10.5 11h-2a1.5 1.5 0 1 0 0 3h2.5"/>
+                  <path d="M9.5 14a1.5 1.5 0 0 0 0 3h1.5"/>
+                  <path d="M10.5 17a1.5 1.5 0 0 0 0 3h4.5a6 6 0 0 0 6 -6v-2v.208a6 6 0 0 0 -2.7 -5.012l-.3 -.196q -.718 -.468 -5.728 -3.286a1.5 1.5 0 0 0 -2.022 .536a1.87 1.87 0 0 0 .28 2.28l1.47 1.47"/>
+                </g>
+                <g fill="none" stroke="#191627" stroke-width=".9"
+                   stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 8h-8.5a1.5 1.5 0 0 0 0 3h7.5"/>
+                  <path d="M10.5 11h-2a1.5 1.5 0 1 0 0 3h2.5"/>
+                  <path d="M9.5 14a1.5 1.5 0 0 0 0 3h1.5"/>
+                  <path d="M10.5 17a1.5 1.5 0 0 0 0 3h4.5a6 6 0 0 0 6 -6v-2v.208a6 6 0 0 0 -2.7 -5.012l-.3 -.196q -.718 -.468 -5.728 -3.286a1.5 1.5 0 0 0 -2.022 .536a1.87 1.87 0 0 0 .28 2.28l1.47 1.47"/>
+                </g>
+              </g>
+            </g>
+            <!-- motion ticks beside the finger -->
+            <g class="hero-gesture-ticks hero-loop" stroke="#ff5d73" stroke-width="3.5" stroke-linecap="round">
+              <path d="M56 190h14M52 208h18M56 226h14"/>
+            </g>
           </g>
-        </g>
-        <!-- finger sliding the warm edge -->
-        <g transform="translate(97 200)">
-          <path d="M0 0c-4 14-2 34 2 48 3 11 12 18 24 18h16c13 0 22-9 22-22V26c0-6-9-6-9 0v10c0-8-10-8-10 0v-6c0-8-10-8-10 0v-8C35 8 24-4 12-6 4-8 2-6 0 0z"
-                fill="#fff6e9" stroke="#191627" stroke-width="3.5" stroke-linejoin="round"/>
-          <path d="M6 8c6 10 8 22 8 32" fill="none" stroke="#191627" stroke-width="2.5" opacity=".4"/>
-        </g>
-        <!-- motion ticks beside the finger -->
-        <g stroke="#ff5d73" stroke-width="3.5" stroke-linecap="round">
-          <path d="M56 176h14M52 194h18M56 212h14"/>
         </g>
       </svg>
     </div>
   </header>
 
   <!-- what each edge does -->
-  <svg class="wave" style="color:var(--paper-2)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V22c140-26 300 24 470 10S840-8 1010 8s150 20 190 16v36z"/></svg>
+  <svg class="wave motion-wave" style="color:var(--paper-2)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V22c140-26 300 24 470 10S840-8 1010 8s150 20 190 16v36z"/></svg>
 
   <section class="block-paper2" aria-label="What each edge does">
     <div class="wrap edges">
       <article class="edge">
         <span class="pill c-sun" style="background:var(--sun)">Left edge</span>
         <h2 class="h3">Brightness, on the real backlight</h2>
-        <svg class="edge-illo" viewBox="0 0 340 180" role="img" aria-label="A screen dimming from dark to bright, with a sun.">
+        <svg class="edge-illo edge-illo--brightness" viewBox="0 0 340 180" role="img" aria-label="A screen dimming from dark to bright, with a sun.">
           <rect x="6" y="14" width="328" height="132" rx="14" fill="url(#gWarm)" stroke="#191627" stroke-width="3.5"/>
           <rect x="22" y="30" width="296" height="100" rx="8" fill="#191627" opacity=".82"/>
           <rect x="22" y="30" width="296" height="100" rx="8" fill="url(#gWarm)" opacity=".25"/>
-          <g transform="translate(80 80)"><circle r="15" fill="#ffc02e" stroke="#fff6e9" stroke-width="2.5"/><g stroke="#fff6e9" stroke-width="2.5" stroke-linecap="round"><path d="M0-24v7M0 17v7M-24 0h7M17 0h7"/></g></g>
-          <g transform="translate(230 80)"><circle r="15" fill="#fff6e9" stroke="#191627" stroke-width="2.5"/><g stroke="#fff6e9" stroke-width="2.5" stroke-linecap="round"><path d="M0-24v7M0 17v7M-24 0h7M17 0h7"/></g></g>
-          <path d="M120 80h80" stroke="#fff6e9" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 8"/>
-          <path d="M196 74l8 6-8 6" fill="none" stroke="#fff6e9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <g class="edge-sun edge-sun--dim" transform="translate(80 80)"><circle r="15" fill="#ffc02e" stroke="#fff6e9" stroke-width="2.5"/><g stroke="#fff6e9" stroke-width="2.5" stroke-linecap="round"><path d="M0-24v7M0 17v7M-24 0h7M17 0h7"/></g></g>
+          <g class="edge-sun edge-sun--bright" transform="translate(230 80)"><circle r="15" fill="#fff6e9" stroke="#191627" stroke-width="2.5"/><g stroke="#fff6e9" stroke-width="2.5" stroke-linecap="round"><path d="M0-24v7M0 17v7M-24 0h7M17 0h7"/></g></g>
+          <path class="edge-brightness-path" d="M120 80h80" stroke="#fff6e9" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 8"/>
+          <path class="edge-brightness-arrow" d="M196 74l8 6-8 6" fill="none" stroke="#fff6e9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
           <rect x="6" y="156" width="328" height="14" rx="7" fill="#fff6e9" stroke="#191627" stroke-width="3"/>
         </svg>
         <p>Not a dark overlay and not a gamma trick. The panel is actually dimmer, and the display you see is the one macOS draws itself rather than a lookalike.</p>
@@ -191,21 +235,21 @@
       <article class="edge">
         <span class="pill" style="background:var(--sky)">Right edge</span>
         <h2 class="h3">Volume, following your output</h2>
-        <svg class="edge-illo" viewBox="0 0 340 180" role="img" aria-label="A speaker with sound arcs and a row of level segments.">
+        <svg class="edge-illo edge-illo--volume" viewBox="0 0 340 180" role="img" aria-label="A speaker with sound arcs and a row of level segments.">
           <rect x="6" y="14" width="328" height="132" rx="14" fill="url(#gCool)" stroke="#191627" stroke-width="3.5"/>
-          <g transform="translate(96 80)">
+          <g class="edge-speaker" transform="translate(96 80)">
             <path d="M-26-22-6-6h-14a4 4 0 0 0-4 4v4a4 4 0 0 0 4 4h14L-6 22z" fill="#fff6e9" stroke="#191627" stroke-width="3.5" stroke-linejoin="round"/>
-            <g fill="none" stroke="#fff6e9" stroke-width="3.5" stroke-linecap="round">
-              <path d="M6-11a13 13 0 0 1 0 22"/><path d="M18-21a25 25 0 0 1 0 42"/>
+            <g class="edge-speaker-waves" fill="none" stroke="#fff6e9" stroke-width="3.5" stroke-linecap="round">
+              <path class="edge-speaker-wave" d="M6-11a13 13 0 0 1 0 22"/><path class="edge-speaker-wave" d="M18-21a25 25 0 0 1 0 42"/>
             </g>
           </g>
-          <g fill="#fff6e9" stroke="#191627" stroke-width="2.5">
-            <rect x="176" y="96" width="15" height="18" rx="3"/>
-            <rect x="197" y="86" width="15" height="28" rx="3"/>
-            <rect x="218" y="72" width="15" height="42" rx="3"/>
-            <rect x="239" y="58" width="15" height="56" rx="3"/>
-            <rect x="260" y="80" width="15" height="34" rx="3" fill="#191627" opacity=".25"/>
-            <rect x="281" y="92" width="15" height="22" rx="3" fill="#191627" opacity=".25"/>
+          <g class="edge-speaker-bars" fill="#fff6e9" stroke="#191627" stroke-width="2.5">
+            <rect class="edge-speaker-bar" style="--bar-delay:0ms" x="176" y="96" width="15" height="18" rx="3"/>
+            <rect class="edge-speaker-bar" style="--bar-delay:45ms" x="197" y="86" width="15" height="28" rx="3"/>
+            <rect class="edge-speaker-bar" style="--bar-delay:90ms" x="218" y="72" width="15" height="42" rx="3"/>
+            <rect class="edge-speaker-bar" style="--bar-delay:135ms" x="239" y="58" width="15" height="56" rx="3"/>
+            <rect class="edge-speaker-bar" style="--bar-delay:180ms" x="260" y="80" width="15" height="34" rx="3" fill="#191627" opacity=".25"/>
+            <rect class="edge-speaker-bar" style="--bar-delay:225ms" x="281" y="92" width="15" height="22" rx="3" fill="#191627" opacity=".25"/>
           </g>
           <rect x="6" y="156" width="328" height="14" rx="7" fill="#fff6e9" stroke="#191627" stroke-width="3"/>
         </svg>
@@ -215,7 +259,7 @@
   </section>
 
   <!-- activation rule -->
-  <svg class="wave" style="color:var(--ink)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V30c180 24 320-26 520-14s330 30 480 4 200-6 200-6v46z"/></svg>
+  <svg class="wave motion-wave" style="color:var(--ink)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V30c180 24 320-26 520-14s330 30 480 4 200-6 200-6v46z"/></svg>
 
   <section class="block-ink">
     <div class="wrap hero-grid">
@@ -225,23 +269,23 @@
         <p class="lede">Being near an edge is not enough. The gesture has to begin inside the edge strip, and it has to be the only finger on the trackpad. A touch that starts in the middle and later wanders to the edge can never activate the slider, for its whole life.</p>
         <p class="lede" style="margin-top:1rem">It also stops listening for half a second after every keystroke, so typing never sets it off. Unglamorous rules, and most of the reason it feels like part of the system. This page behaves the same way — dragging from the middle does nothing.</p>
       </div>
-      <svg class="scene" viewBox="0 0 420 300" role="img" aria-label="Diagram: a slide beginning on the edge is accepted; a slide beginning in the middle and moving to the edge is rejected.">
+      <svg class="scene activation-scene" viewBox="0 0 420 300" role="img" aria-label="Diagram: a slide beginning on the edge is accepted; a slide beginning in the middle and moving to the edge is rejected.">
         <rect x="20" y="24" width="380" height="252" rx="18" fill="#241f38" stroke="#fff6e9" stroke-width="3"/>
         <rect x="20" y="24" width="58" height="252" rx="16" fill="url(#gWarm)" stroke="#fff6e9" stroke-width="3"/>
         <!-- accepted path -->
-        <path d="M49 226V96" fill="none" stroke="#1fd0a3" stroke-width="5.5" stroke-linecap="round"/>
-        <path d="M40 108l9-13 9 13" fill="none" stroke="#1fd0a3" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="49" cy="226" r="9" fill="#1fd0a3" stroke="#191627" stroke-width="3"/>
-        <g transform="translate(96 196)">
+        <path class="activation-path activation-path--accepted" d="M49 226V96" fill="none" stroke="#1fd0a3" stroke-width="5.5" stroke-linecap="round"/>
+        <path class="activation-arrow activation-arrow--accepted" d="M40 108l9-13 9 13" fill="none" stroke="#1fd0a3" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle class="activation-origin activation-origin--accepted" cx="49" cy="226" r="9" fill="#1fd0a3" stroke="#191627" stroke-width="3"/>
+        <g class="activation-result activation-result--accepted" transform="translate(96 196)">
           <circle r="17" fill="#1fd0a3" stroke="#fff6e9" stroke-width="3"/>
           <path d="M-7 1l5 5 9-10" fill="none" stroke="#191627" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
         </g>
         <text x="124" y="202" fill="#fff6e9" font-family="'Space Mono',monospace" font-size="14" font-weight="700">STARTS ON EDGE</text>
         <!-- rejected: begins in the middle, so it never activates -->
         <text x="196" y="58" fill="#fff6e9" font-family="'Space Mono',monospace" font-size="14" font-weight="700">STARTS IN MIDDLE</text>
-        <path d="M256 88C222 104 184 120 156 136" fill="none" stroke="#ff5d73" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="10 9"/>
-        <circle cx="256" cy="88" r="9" fill="#ff5d73" stroke="#fff6e9" stroke-width="3"/>
-        <g transform="translate(140 148)">
+        <path class="activation-path activation-path--rejected" d="M256 88C222 104 184 120 156 136" fill="none" stroke="#ff5d73" stroke-width="5.5" stroke-linecap="round" stroke-dasharray="10 9"/>
+        <circle class="activation-origin activation-origin--rejected" cx="256" cy="88" r="9" fill="#ff5d73" stroke="#fff6e9" stroke-width="3"/>
+        <g class="activation-result activation-result--rejected" transform="translate(140 148)">
           <circle r="17" fill="#ff5d73" stroke="#fff6e9" stroke-width="3"/>
           <path d="M-6-6l12 12M6-6l-12 12" fill="none" stroke="#fff6e9" stroke-width="4" stroke-linecap="round"/>
         </g>
@@ -272,7 +316,7 @@
   </section>
 
   <!-- install -->
-  <svg class="wave" style="color:var(--mint)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V18c160 30 340-22 540-10s310 26 460 2 200 0 200 0v50z"/></svg>
+  <svg class="wave motion-wave" style="color:var(--mint)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V18c160 30 340-22 540-10s310 26 460 2 200 0 200 0v50z"/></svg>
 
   <section class="block-mint" id="install">
     <div class="wrap">
@@ -280,8 +324,8 @@
       <h2 class="h2" style="margin:1.25rem 0 1.5rem">Free, and open<br>from top to bottom.</h2>
 
       <div class="cmd">
-        <code id="brewcmd">brew install --cask --no-quarantine helgafinn/tap/glisse</code>
-        <button class="btn" data-copy="brew install --cask --no-quarantine helgafinn/tap/glisse" data-for="brewcmd">Copy</button>
+        <code id="brewcmd">brew install --cask helgafinn/tap/glisse</code>
+        <button class="btn" data-copy="brew install --cask helgafinn/tap/glisse" data-for="brewcmd">Copy</button>
       </div>
 
       <p class="lede">Or take the DMG from the <a href="https://github.com/helgafinn/glisse/releases">releases page</a>. MIT licensed. No trial, no licence key, no account, no telemetry, no analytics, and no network code of any kind — the app makes no outbound connection, ever.</p>
@@ -295,7 +339,7 @@
       <span class="pill" style="background:var(--coral);color:var(--paper)">The honest part</span>
       <h2 class="h2" style="margin:1.25rem 0 2.25rem">What is not<br>finished yet.</h2>
       <ul class="honest">
-        <li><b>Ad-hoc signed, not notarised</b><span>Notarising needs a paid Apple Developer account this project does not have. That is what <code>--no-quarantine</code> is for, and it costs something real: macOS forgets the Accessibility permission on every upgrade, so you grant it again.</span></li>
+        <li><b>Ad-hoc signed, not notarised</b><span>Notarising needs a paid Apple Developer account this project does not have. Homebrew can install Glissé normally, but Gatekeeper may require you to right-click the app and choose Open on first launch. Because each release is ad-hoc signed, macOS forgets the Accessibility permission on every upgrade, so you grant it again.</span></li>
         <li><b>No App Store version, and there cannot be one</b><span>Reading raw trackpad contacts, drawing the system HUD and talking to a monitor over I2C have no entitlements available. This is a program you choose to trust, and it should say so rather than implying a review vouched for it.</span></li>
         <li><b>External monitor brightness is unverified</b><span>The DDC path is written and the reply parser follows the spec, but no second display was available to test it on.</span></li>
         <li><b>Intel and Magic Trackpad are unverified</b><span>Those code paths exist and compile. Nobody has run them on that hardware yet.</span></li>
@@ -306,7 +350,7 @@
 
 </main>
 
-<svg class="wave" style="color:var(--ink)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V26c150 22 330-18 520-8s340 22 480 0 200-4 200-4v46z"/></svg>
+<svg class="wave motion-wave" style="color:var(--ink)" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 60V26c150 22 330-18 520-8s340 22 480 0 200-4 200-4v46z"/></svg>
 
 <footer class="block-ink">
   <div class="wrap">

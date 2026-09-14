@@ -108,9 +108,9 @@ I ended up here writing [Glissé](https://github.com/helgafinn/glisse), which pu
 **It is free and open source.** MIT licensed, no payment, no trial, no licence key, no accounts, no telemetry, no analytics, no network code of any kind. Install it with:
 
 ```bash
-brew install --cask --no-quarantine helgafinn/tap/glisse
+brew install --cask helgafinn/tap/glisse
 ```
 
-The `--no-quarantine` is not a trick — the build is ad-hoc signed rather than notarised, because notarisation needs a paid Apple Developer account this project does not have. Gatekeeper would otherwise refuse to open it. One consequence worth knowing before you install: because the signature is ad-hoc, macOS forgets the Accessibility grant on each upgrade and you have to give it again.
+The build is ad-hoc signed rather than notarised, because notarisation needs a paid Apple Developer account this project does not have. After Homebrew installs it, Gatekeeper may require you to right-click Glissé in `/Applications` and choose **Open** on first launch. One consequence worth knowing before you install: because the signature is ad-hoc, macOS forgets the Accessibility grant on each upgrade and you have to give it again.
 
 Every private symbol it touches is documented in the README with the reason no public alternative exists, including the parts that are unverified — the Intel paths are written but have only been tested on Apple Silicon. If you only want the technique rather than the app, `Sources/GlissePrivate/` is the interesting directory.
